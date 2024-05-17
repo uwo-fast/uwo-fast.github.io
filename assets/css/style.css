@@ -1,0 +1,92 @@
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+header {
+    background-color: #2a7d2a;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    background-color: #246924;
+}
+
+nav a {
+    color: #fff;
+    padding: 1rem;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+nav a:hover {
+    background-color: #1e571e;
+}
+
+main {
+    padding: 2rem;
+    max-width: 960px;
+    margin: auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #2a7d2a;
+}
+
+a {
+    color: #2a7d2a;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    background-color: #2a7d2a;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Utility classes */
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+    }
+
+    nav a {
+        padding: 0.5rem;
+    }
+
+    main {
+        padding: 1rem;
+    }
+}
