@@ -8,7 +8,7 @@ body {
 }
 
 header {
-    background-color: #2a7d2a;
+    background-color: #4f2683; /* Western University's purple */
     color: #fff;
     padding: 1rem 0;
     text-align: center;
@@ -22,7 +22,7 @@ header h1 {
 nav {
     display: flex;
     justify-content: center;
-    background-color: #246924;
+    background-color: #3e205b; /* A darker shade of purple for contrast */
 }
 
 nav a {
@@ -33,21 +33,24 @@ nav a {
 }
 
 nav a:hover {
-    background-color: #1e571e;
+    background-color: #4f2683; /* Western University's purple */
 }
 
 main {
     padding: 2rem;
     max-width: 960px;
     margin: auto;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: #2a7d2a;
+    color: #4f2683; /* Western University's purple */
 }
 
 a {
-    color: #2a7d2a;
+    color: #2a7d2a; /* Green for sustainability */
     text-decoration: none;
 }
 
@@ -56,7 +59,7 @@ a:hover {
 }
 
 footer {
-    background-color: #2a7d2a;
+    background-color: #4f2683; /* Western University's purple */
     color: #fff;
     text-align: center;
     padding: 1rem 0;
@@ -74,6 +77,21 @@ footer {
 
 .text-center {
     text-align: center;
+}
+
+.button {
+    background-color: #ff7300; /* Orange for your logo */
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #e66200; /* Darker orange for hover effect */
 }
 
 /* Responsive styles */
