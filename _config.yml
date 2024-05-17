@@ -32,7 +32,7 @@ theme: "just-the-docs"
 
 # Optional configurations for the theme
 just-the-docs:
-  logo: "assets\FAST_Logo_Orange_on_White.png" # Path to your logo
+  logo: "/assets/FAST_Logo_Orange_on_White.png" # Path to your logo
   search_enabled: true
   show_last_updated_time: true
   show_last_updated_time_format: "%b %d, %Y"
