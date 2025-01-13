@@ -15,6 +15,10 @@
     --spring: #B9F876;
     --vivid: #FCF05E;
     --tiger: #F0A757;
+
+    /* Custom */
+    --darksky: #2B89A1;
+
   }
   
 /* General styles */
@@ -69,7 +73,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-    color: var(--sky); /* Sky color */
+    color: var(--darksky); /* A Darkened Sky color (normal sky is too light) */
     text-decoration: none;
 }
 
