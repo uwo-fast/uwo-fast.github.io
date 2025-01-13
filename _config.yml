@@ -41,7 +41,7 @@ plugins:
   - jekyll-feed
 
 # Custom Permalink structure
-permalink: /:categories/:year/:month/:day/:title/
+permalink: /:categories/:title/
 
 # Ensure _projects is included
 include:
