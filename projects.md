@@ -8,6 +8,6 @@ At the Free Appropriate Sustainability Technology (FAST) Research Group, we are 
 
 ## Ongoing Projects
 
-[OpenAgriS3D](/openagris3d/)
+[OpenAgriS3D](/projects/openagris3d/)
 
-[SAMA](/sama/)
+[SAMA](/projects/sama/)
