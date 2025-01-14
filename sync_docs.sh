@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set layout type for README.md files (can be easily changed)
-LAYOUT_TYPE="page"
+LAYOUT_TYPE="projects"
 
 # Force submodule update (set to true to force changes)
 FORCE_SUBMODULE_UPDATE=true
