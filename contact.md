@@ -4,6 +4,8 @@ title: "Contact Us"
 permalink: /contact/
 ---
 
+# Contact Us
+
 For inquiries, please contact:
 
 **Joshua M. Pearce, Ph.D., FCAE**
