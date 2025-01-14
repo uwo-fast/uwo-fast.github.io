@@ -36,11 +36,11 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
           cache-version: 0 # Increment this number if you need to re-download cached gems
 
-      - name: Run sync-docs script
+      - name: Run sync_docs script
         # Ensures the docs and front matter are synced before the Jekyll build
         run: |
-          chmod +x ./sync-docs.sh
-          ./sync-docs.sh
+          chmod +x ./sync_docs.sh
+          ./sync_docs.sh
 
       - name: Setup Pages
         id: pages
