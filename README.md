@@ -65,7 +65,7 @@ jekyll clean; bundle install; bundle exec jekyll build      # PowerShell
    Clean up previously built site files.
 
    ```
-   jekyll clean
+   bundle exec jekyll clean
    ```
 
 2. **Reinstall Dependencies**
