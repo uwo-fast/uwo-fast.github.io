@@ -1,0 +1,6 @@
+[submodule "_projects/sama"]
+	path = _projects/sama
+	url = https://github.com/uwo-fast/sama.git
+[submodule "_projects/OpenAgriS3D"]
+	path = _projects/OpenAgriS3D
+	url = https://github.com/uwo-fast/OpenAgriS3D.git
