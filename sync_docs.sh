@@ -11,6 +11,18 @@ for project in _projects/*; do
             cp -r "$project/assets"/* assets/
         fi
         
+        # Check if README.md exists and create it as the project index
+        if [ -f "$project/README.md" ]; then
+            readme_file="$project/README.md"
+            readme_title=$(basename "$project" | sed -e 's/-/ /g' -e 's/\b\(.\)/\u\1/g')
+            
+            # Check if front matter exists in the README
+            if ! grep -q "^---" "$readme_file"; then
+                # Add front matter with a proper permalink and title
+                echo -e "---\nlayout: project-index\ntitle: \"$readme_title\"\npermalink: /projects/$(basename "$project")/\n---\n$(cat "$readme_file")" > "$readme_file"
+            fi
+        fi
+        
         # Process each markdown file in docs
         find "$project/docs" -name "*.md" | while read -r file; do
             # Extract relative path from the docs folder and generate a URL-friendly title
