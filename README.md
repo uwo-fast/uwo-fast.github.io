@@ -6,13 +6,6 @@ uwo-fast GitHub Pages website!
 
 ## Jekyll Development Primer
 
-Useful one liner to fully clean and rebuild the site:
-
-```
-jekyll clean && bundle install && bundle exec jekyll build  # Bash
-jekyll clean; bundle install; bundle exec jekyll build      # PowerShell
-```
-
 ### Prerequisites
 
 1. **Install Ruby**  
