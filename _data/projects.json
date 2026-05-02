@@ -5,8 +5,13 @@
     "description": "Parametric 3D printed designs for sustainable small-scale agriculture."
   },
   {
-    "name": "OS Mechanical Tester",
-    "repo": "uwo-fast/OS-Mechanical-Tester",
-    "description": "Open-source mechanical testing system with Arduino hardware control and professional GUI."
+    "name": "Open Source Bioreactor",
+    "repo": "uwo-fast/open-source-bioreactor",
+    "description": "An open-source bioreactor platform for accessible biological research."
+  },
+  {
+    "name": "Desktop Sheet Press",
+    "repo": "uwo-fast/desktop-sheet-press",
+    "description": "Open-source desktop sheet press for recycled plastic fabrication."
   }
 ]

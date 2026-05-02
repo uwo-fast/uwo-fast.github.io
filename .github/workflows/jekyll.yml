@@ -22,12 +22,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fetch project content
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           jq -r '.[] | .repo' _data/projects.json | while read -r repo; do
             dir=$(basename "$repo")
-            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${repo}.git" "_projects/${dir}"
+            git clone --depth 1 "https://github.com/${repo}.git" "_projects/${dir}"
           done
           find _projects -name "README.md" -execdir mv README.md index.md \;
 
