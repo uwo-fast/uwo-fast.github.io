@@ -1,0 +1,12 @@
+[
+  {
+    "name": "OpenAgriS3D",
+    "repo": "uwo-fast/OpenAgriS3D",
+    "description": "Parametric 3D printed designs for sustainable small-scale agriculture."
+  },
+  {
+    "name": "OS Mechanical Tester",
+    "repo": "uwo-fast/OS-Mechanical-Tester",
+    "description": "Open-source mechanical testing system with Arduino hardware control and professional GUI."
+  }
+]

@@ -23,8 +23,10 @@ jobs:
 
       - name: Fetch project content
         run: |
-          git clone --depth 1 https://github.com/uwo-fast/OpenAgriS3D.git _projects/OpenAgriS3D
-          git clone --depth 1 https://github.com/uwo-fast/OS-Mechanical-Tester.git _projects/OS-Mechanical-Tester
+          jq -r '.[] | .repo' _data/projects.json | while read -r repo; do
+            dir=$(basename "$repo")
+            git clone --depth 1 "https://github.com/${repo}.git" "_projects/${dir}"
+          done
           find _projects -name "README.md" -execdir mv README.md index.md \;
 
       - name: Setup Ruby
