@@ -1,15 +1,10 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
 name: Deploy Jekyll site to Pages
 
 on:
-  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
@@ -20,34 +15,30 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive # Ensures submodules are checked out
+
+      - name: Fetch project content
+        run: |
+          git clone --depth 1 https://github.com/uwo-fast/OpenAgriS3D.git _projects/OpenAgriS3D
+          git clone --depth 1 https://github.com/uwo-fast/sama.git _projects/sama
+          find _projects -name "README.md" -execdir mv README.md index.md \;
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@086ffb1a2090c870a3f881cc91ea83aa4243d408 # v1.195.0
         with:
-          ruby-version: "3.1" # Not needed with a .ruby-version file
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-          cache-version: 0 # Increment this number if you need to re-download cached gems
-
-      - name: Run sync_docs script
-        # Ensures the docs and front matter are synced before the Jekyll build
-        run: |
-          chmod +x ./sync_docs.sh
-          ./sync_docs.sh
+          ruby-version: "3.1"
+          bundler-cache: true
+          cache-version: 0
 
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
 
       - name: Build with Jekyll
-        # Outputs to the './_site' directory by default
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production

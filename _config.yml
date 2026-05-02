@@ -43,9 +43,18 @@ plugins:
 # Custom Permalink structure
 permalink: /:categories/:title/
 
-# Ensure _projects is included
-include:
-  - _projects
+# Project documentation pulled in at CI time (git clone)
+collections:
+  projects:
+    output: true
+    permalink: /projects/:path/
+
+defaults:
+  - scope:
+      path: ""
+      type: projects
+    values:
+      layout: page
 
 # Exclude from processing.
 # The following items will not be processed, by default.
