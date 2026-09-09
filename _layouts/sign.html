@@ -1,0 +1,48 @@
+---
+layout: default
+---
+
+<div class="sign-scope">
+  <p>
+    <strong>These are the FAST group's own lab signs.</strong> They are written for one
+    lab, its equipment, its layout and its local procedures, and are published so others
+    can see and adapt them. They are not general safety guidance and they are not a
+    substitute for training.
+  </p>
+  <p>
+    If you work somewhere else, follow your own workplace procedures and the requirements
+    of your institution and jurisdiction.
+  </p>
+</div>
+
+<div class="sign-status sign-status--{{ page.status | default: 'draft' }}">
+  <span class="sign-status__state">{{ page.status | default: 'draft' | capitalize }}</span>
+  {% if page.status == 'review' %}
+  <span class="sign-status__note">awaiting PI, post-doc, equipment owner or subject-matter review</span>
+  {% elsif page.status == 'draft' %}
+  <span class="sign-status__note">written but not verified</span>
+  {% elsif page.status == 'approved' %}
+  <span class="sign-status__note">reviewed and posted in the lab</span>
+  {% elsif page.status == 'retired' %}
+  <span class="sign-status__note">no longer in use</span>
+  {% endif %}
+  <span class="sign-status__meta">
+    v{{ page.version }}
+    {% if page.review_owner %} &middot; review owner: {{ page.review_owner }}{% endif %}
+    {% if page.last_updated %} &middot; updated {{ page.last_updated }}{% endif %}
+  </span>
+</div>
+
+{{ content }}
+
+<hr>
+
+<p class="sign-source">
+  Source:
+  <a href="https://github.com/uwo-fast/uwo-fast/blob/main/lab-signs/{{ page.slug }}.md">lab-signs/{{ page.slug }}.md</a>
+  {% assign record = site.equipment | where: "slug", page.slug | first %}
+  {% if record %}
+  &middot; <a href="{{ record.url | relative_url }}">equipment record</a>
+  {% endif %}
+  &middot; <a href="{{ '/signs/' | relative_url }}">all signs</a>
+</p>

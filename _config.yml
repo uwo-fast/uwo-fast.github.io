@@ -44,15 +44,32 @@ plugins:
 permalink: /:categories/:title/
 
 # Project documentation pulled in at CI time (git clone)
+# Lab signs and equipment records likewise, via scripts/fetch-signs.sh
 collections:
   projects:
     output: true
     permalink: /projects/:path/
+  signs:
+    output: true
+    permalink: /signs/:name/
+  equipment:
+    output: true
+    permalink: /equipment/:name/
 
 defaults:
   - scope:
       path: ""
       type: projects
+    values:
+      layout: page
+  - scope:
+      path: ""
+      type: signs
+    values:
+      layout: sign
+  - scope:
+      path: ""
+      type: equipment
     values:
       layout: page
 

@@ -4,3 +4,6 @@ _site
 .jekyll-metadata
 vendor
 _projects/
+.bundle/
+_signs/
+_equipment/

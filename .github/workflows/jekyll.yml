@@ -29,6 +29,10 @@ jobs:
           done
           find _projects -name "README.md" -execdir mv README.md index.md \;
 
+      # Same script that runs locally, so a page cannot build here and 404 there.
+      - name: Fetch lab signs and equipment records
+        run: ./scripts/fetch-signs.sh
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@086ffb1a2090c870a3f881cc91ea83aa4243d408 # v1.195.0
         with:
