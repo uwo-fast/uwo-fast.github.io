@@ -4,6 +4,16 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+  # The lab signs and equipment records are cloned from uwo-fast/uwo-fast at
+  # build time, so a change there does not reach this site until it rebuilds.
+  # Printed QR codes point at these pages, and a code on a wall serving stale
+  # safety guidance is worse than one that fails, so rebuild on a schedule as
+  # well. repository_dispatch lets that repo push a rebuild immediately once a
+  # token is available; the schedule is the floor, not the mechanism.
+  schedule:
+    - cron: "17 6 * * *"
+  repository_dispatch:
+    types: [signs-updated]
 
 permissions:
   contents: read
