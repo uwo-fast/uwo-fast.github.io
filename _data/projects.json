@@ -22,12 +22,12 @@
   {
     "name": "Nasopharyngeal Swab",
     "repo": "uwo-fast/nasopharyngeal-swab",
-    "description": "A parametric OpenSCAD nasopharyngeal swab, printed in resin, with interchangeable printed handles."
+    "description": "A parametric OpenSCAD nasopharyngeal swab, printed in resin, with a lock or tong handle printed on an FFF printer."
   },
   {
     "name": "openreactor",
     "repo": "uwo-fast/openreactor",
-    "description": "Monitor and control bench-scale reactors from a Raspberry Pi: sensor logging, temperature and motor control, and recorded runs, in a web interface."
+    "description": "Supervise bench-scale reactors from a Raspberry Pi: sensor logging, heater and motor setpoints, and recorded runs, in a web interface."
   },
   {
     "name": "Feedstock Hopper",
