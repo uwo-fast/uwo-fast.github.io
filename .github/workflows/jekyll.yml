@@ -31,6 +31,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Test the project page script
+        run: python3 -m unittest discover tests
+
       - name: Fetch project content
         run: ./scripts/fetch-projects.sh
 

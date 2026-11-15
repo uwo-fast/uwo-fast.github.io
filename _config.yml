@@ -51,6 +51,11 @@ defaults:
     values:
       layout: page
 
+# Build tooling, not site content.
+exclude:
+  - scripts/
+  - tests/
+
 markdown: kramdown
 
 sass:

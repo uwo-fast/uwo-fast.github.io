@@ -7,3 +7,4 @@ _projects/
 .bundle/
 _signs/
 _equipment/
+__pycache__/
