@@ -13,3 +13,6 @@ end
 
 # `jekyll serve` needs webrick on Ruby 3.
 gem "webrick"
+
+# Windows and JRuby have no zoneinfo files of their own.
+gem "tzinfo-data", platforms: [:windows, :jruby]
