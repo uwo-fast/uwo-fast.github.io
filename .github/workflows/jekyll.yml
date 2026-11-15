@@ -26,9 +26,7 @@ concurrency:
 
 jobs:
   build:
-    # ruby/setup-ruby v1.195.0 rejects Ubuntu 26.04, which ubuntu-latest became
-    # in November 2026; move this with any bump of that action.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
