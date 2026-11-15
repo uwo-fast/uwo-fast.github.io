@@ -12,6 +12,10 @@ Relative links in those pages are rewritten: a link to another rendered page
 goes to that page, and a link to anything else in the repository goes to the
 file on GitHub. An image in the repository is pointed at its copy on the site,
 since the files beside the pages are still published.
+
+A file that cannot become a page (two files for one URL, not UTF-8, a symlink)
+is skipped with a warning rather than failing the fetch: the same build keeps
+the lab sign pages current, and one project's docs must not hold that up.
 """
 
 import json
@@ -21,15 +25,26 @@ import sys
 from pathlib import Path
 from urllib.parse import quote, unquote
 
-FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
+FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
 CODE_SPAN = re.compile(r"(`+).*?\1")
-# [text](target "title") and ![alt](target), target optionally in <...>
-INLINE = re.compile(r"(!?)\[((?:[^\[\]]|\[[^\]]*\])*)\]\(\s*(<[^>\n]*>|[^)\s]+)((?:\s+(?:\"[^\"]*\"|'[^']*'))?\s*)\)")
-REF_DEF = re.compile(r"^( {0,3}\[[^\]]+\]:[ \t]*)(<[^>\n]*>|\S+)(.*)$")
+# [text](target "title") and ![alt](target); the target may be in <...> and
+# may hold one level of parentheses, as in foo_(bar).md
+INLINE = re.compile(
+    r"(!?)\[((?:[^\[\]]|\[[^\]]*\])*)\]"
+    r"\(\s*(<[^>\n]*>|(?:[^()\s]|\([^()\s]*\))+)((?:\s+(?:\"[^\"]*\"|'[^']*'))?\s*)\)"
+)
+REF_DEF = re.compile(r"^( {0,3}\[([^\]]+)\]:[ \t]*)(<[^>\n]*>|\S+)(.*)$")
+REF_IMAGE = re.compile(r"!\[([^\]]*)\](?:\[([^\]]*)\])?")
 HREF = re.compile(r"(<a\s[^>]*?\bhref=)(\"[^\"]*\"|'[^']*')", re.IGNORECASE)
 IMG_SRC = re.compile(r"(<img\s[^>]*?\bsrc=)(\"[^\"]*\"|'[^']*')", re.IGNORECASE)
 SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 YAML_LINE = re.compile(r"^([A-Za-z_][A-Za-z0-9_-]*:|\s|- )")
+TARGET = re.compile(r"^([^?#]*)(\?[^#]*)?(#.*)?$")
+
+
+def warn(message):
+    # A GitHub Actions annotation in CI, a plain line locally.
+    print(f"::warning::{message}")
 
 
 def front_matter_end(lines):
@@ -51,19 +66,54 @@ def front_matter_end(lines):
     return None
 
 
-def first_heading(lines):
-    in_fence = None
+def fence_step(fence, line):
+    """(new fence state, whether this line is a fence line).
+
+    A fence closes only on the same character, at least as long as the one
+    that opened it, with nothing after it.
+    """
+    m = FENCE.match(line)
+    if not m:
+        return fence, False
+    mark = m.group(1)
+    if fence is None:
+        return (mark[0], len(mark)), True
+    if mark[0] == fence[0] and len(mark) >= fence[1] and not m.group(2).strip():
+        return None, True
+    return fence, False
+
+
+def code_lines(lines):
+    """Yield (line, in_code) for each line, without its line ending."""
+    fence = None
     for raw in lines:
         line = raw.rstrip("\r\n")
-        m = FENCE.match(line)
-        if m:
-            in_fence = None if in_fence and m.group(1)[0] == in_fence else (in_fence or m.group(1)[0])
-            continue
-        if in_fence:
+        fence, is_fence = fence_step(fence, line)
+        yield line, bool(fence) or is_fence
+
+
+def first_heading(lines):
+    previous = None
+    for line, code in code_lines(lines):
+        if code:
+            previous = None
             continue
         m = re.match(r"^ {0,3}# +(.+?)(?: +#+)?\s*$", line)
         if m:
             return m.group(1).strip()
+        if previous and re.match(r"^ {0,3}=+\s*$", line):
+            return previous.strip()
+        previous = line if line.strip() else None
+    return None
+
+
+def declared_permalink(lines):
+    end = front_matter_end(lines)
+    for raw in lines[1:end] if end else []:
+        m = re.match(r"^permalink:\s*(.+?)\s*$", raw.rstrip("\r\n"))
+        if m:
+            value = m.group(1)
+            return value[1:-1] if value[:1] in "\"'" and value[-1:] == value[:1] else value
     return None
 
 
@@ -74,11 +124,21 @@ class Project:
         self.name = name
         self.dir = dest.name
         self.pages = {}  # repo-relative path -> permalink
+        self.texts = {}
+
+    def skip(self, path, why):
+        warn(f"{self.dir}: not publishing {path.relative_to(self.dest).as_posix()}: {why}")
+        path.unlink()
 
     def collect(self):
         for path in sorted(self.dest.rglob("*")):
             rel = path.relative_to(self.dest).as_posix()
-            if not path.is_file() or rel.startswith(".git/") or path.suffix.lower() != ".md":
+            if rel.startswith(".git/") or path.suffix.lower() != ".md":
+                continue
+            if path.is_symlink():
+                self.skip(path, "it is a symlink")
+                continue
+            if not path.is_file():
                 continue
             if rel.lower() == "readme.md":
                 url = f"/projects/{self.dir}/"
@@ -90,10 +150,18 @@ class Project:
             else:
                 path.unlink()
                 continue
-            for other, other_url in self.pages.items():
-                if other_url == url:
-                    sys.exit(f"error: {self.dest / rel} and {self.dest / other} would both be {url}")
+            try:
+                text = path.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                self.skip(path, "it is not UTF-8")
+                continue
+            url = declared_permalink(text.splitlines(keepends=True)) or url
+            clash = next((other for other, u in self.pages.items() if u == url), None)
+            if clash:
+                self.skip(path, f"{clash} already has the URL {url}")
+                continue
             self.pages[rel] = url
+            self.texts[rel] = text
 
     def target(self, here, raw, image):
         """The rewritten link target, or None to leave it as written."""
@@ -101,77 +169,80 @@ class Project:
         target = raw[1:-1] if angle else raw
         if not target or target.startswith(("#", "/")) or SCHEME.match(target):
             return None
-        path, _, frag = target.partition("#")
+        path, query, frag = TARGET.match(target).groups()
+        query, frag = query or "", frag or ""
         path = posixpath.normpath(posixpath.join(posixpath.dirname(here), unquote(path)))
         if path == ".." or path.startswith("../"):
             return None
         if image:
             # Pages are served one directory deeper than their source file
             # (docs/a.md -> docs/a/), so a relative image path would miss.
-            return quote(f"/projects/{self.dir}/{path}") if (self.dest / path).is_file() else None
-        frag = f"#{frag}" if frag else ""
+            if (self.dest / path).is_file():
+                return quote(f"/projects/{self.dir}/{path}") + query + frag
+            return None
         if path in self.pages:
-            return quote(self.pages[path]) + frag
+            return quote(self.pages[path]) + query + frag
         full = self.dest / path
         if full.is_dir():
             for child, url in self.pages.items():
                 if posixpath.dirname(child) == ("" if path == "." else path) and posixpath.basename(child).lower() in ("readme.md", "index.md"):
-                    return quote(url) + frag
+                    return quote(url) + query + frag
             kind = "tree"
         elif full.is_file() or path.lower().endswith(".md"):
             kind = "blob"
         else:
             return None
         rest = "" if path == "." else f"/{quote(path)}"
-        return f"https://github.com/{self.repo}/{kind}/HEAD{rest}{frag}"
+        return f"https://github.com/{self.repo}/{kind}/HEAD{rest}{query}{frag}"
 
-    def rewrite_line(self, here, line):
-        spans = [m.span() for m in CODE_SPAN.finditer(line)]
+    def rewrite_line(self, here, line, image_labels):
+        ref = REF_DEF.match(line)
+        if ref:
+            image = ref.group(2).strip().lower() in image_labels
+            new = self.target(here, ref.group(3), image=image)
+            return line if new is None else f"{ref.group(1)}{new}{ref.group(4)}"
 
-        def in_code(pos):
-            return any(a <= pos < b for a, b in spans)
+        def outside_code(sub):
+            # Code-span positions are taken afresh for each pass, since the
+            # pass before may have changed the line's length.
+            def run(pattern, text):
+                spans = [m.span() for m in CODE_SPAN.finditer(text)]
+                return pattern.sub(lambda m: m.group(0) if any(a <= m.start() < b for a, b in spans) else sub(m), text)
+            return run
 
         def inline(m):
-            if in_code(m.start()):
-                return m.group(0)
             text = INLINE.sub(inline, m.group(2))  # an image inside a link
             new = self.target(here, m.group(3), image=bool(m.group(1)))
             return f"{m.group(1)}[{text}]({m.group(3) if new is None else new}{m.group(4)})"
 
         def attr(image):
             def sub(m):
-                if in_code(m.start()):
-                    return m.group(0)
                 q = m.group(2)[0]
                 new = self.target(here, m.group(2)[1:-1], image=image)
                 return m.group(0) if new is None else f"{m.group(1)}{q}{new}{q}"
             return sub
 
-        ref = REF_DEF.match(line)
-        if ref:
-            new = self.target(here, ref.group(2), image=False)
-            return line if new is None else f"{ref.group(1)}{new}{ref.group(3)}"
-        line = INLINE.sub(inline, line)
-        return IMG_SRC.sub(attr(True), HREF.sub(attr(False), line))
+        line = outside_code(inline)(INLINE, line)
+        line = outside_code(attr(False))(HREF, line)
+        return outside_code(attr(True))(IMG_SRC, line)
 
     def render(self, rel, url):
         path = self.dest / rel
-        text = path.read_text(encoding="utf-8")
-        lines = text.splitlines(keepends=True)
+        lines = self.texts[rel].splitlines(keepends=True)
         end = front_matter_end(lines)
         head, body = (lines[: end + 1], lines[end + 1 :]) if end is not None else ([], lines)
 
-        out, fence = [], None
-        for raw in body:
-            line = raw.rstrip("\r\n")
+        image_labels = set()
+        for line, code in code_lines(body):
+            if not code:
+                for m in REF_IMAGE.finditer(line):
+                    if not line[m.end():m.end() + 1] == "(":
+                        image_labels.add((m.group(2) or m.group(1)).strip().lower())
+
+        out = []
+        for raw, (line, code) in zip(body, code_lines(body)):
             eol = raw[len(line):]
-            m = FENCE.match(line)
-            if m:
-                char = m.group(1)[0]
-                fence = None if fence == char else (fence or char)
-                out.append(raw)
-                continue
-            out.append(raw if fence else self.rewrite_line(rel, line) + eol)
+            out.append(raw if code else self.rewrite_line(rel, line, image_labels) + eol)
 
         if rel.lower() == "readme.md":
             title = self.name

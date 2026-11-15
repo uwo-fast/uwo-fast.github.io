@@ -1,6 +1,8 @@
 """Tests for scripts/project-pages.py.  Run: python3 -m unittest discover tests"""
 
+import contextlib
 import importlib.util
+import io
 import json
 import tempfile
 import unittest
@@ -60,12 +62,52 @@ class Selection(Base):
         self.assertEqual(json.loads(self.front("docs/README.md")["permalink"]), "/projects/demo/docs/")
         self.assertEqual(json.loads(self.front("docs/sub/deep.md")["permalink"]), "/projects/demo/docs/sub/deep/")
 
-    def test_two_files_for_one_url_is_an_error(self):
+    def run_quiet(self):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            count = self.run_pages()
+        return count, out.getvalue()
+
+    def test_two_files_for_one_url_skip_the_second_with_a_warning(self):
         self.write("README.md", "x\n")
         self.write("docs/README.md", "x\n")
         self.write("docs/index.md", "x\n")
-        with self.assertRaises(SystemExit):
-            self.run_pages()
+        self.write("docs/a.md", "x\n")
+        self.write("docs/a/README.md", "x\n")
+        count, out = self.run_quiet()
+        self.assertEqual(count, 3)
+        self.assertFalse((self.dest / "docs/index.md").exists())
+        # The first file in path order keeps the URL.
+        self.assertTrue((self.dest / "docs/a/README.md").exists())
+        self.assertFalse((self.dest / "docs/a.md").exists())
+        self.assertIn("::warning::demo: not publishing docs/index.md", out)
+        self.assertIn("::warning::demo: not publishing docs/a.md", out)
+
+    def test_undecodable_file_is_skipped_and_the_rest_render(self):
+        self.write("README.md", "[b](docs/bad.md)\n")
+        (self.dest / "docs").mkdir()
+        (self.dest / "docs/bad.md").write_bytes(b"\xff\xfe\x00bad")
+        count, out = self.run_quiet()
+        self.assertEqual(count, 1)
+        self.assertFalse((self.dest / "docs/bad.md").exists())
+        self.assertIn("not UTF-8", out)
+
+    def test_symlink_is_skipped_and_its_target_untouched(self):
+        outside = Path(self.tmp.name) / "outside.md"
+        outside.write_text("secret\n")
+        self.write("README.md", "x\n")
+        (self.dest / "docs").mkdir()
+        (self.dest / "docs/ln.md").symlink_to(outside)
+        count, out = self.run_quiet()
+        self.assertEqual(count, 1)
+        self.assertFalse((self.dest / "docs/ln.md").is_symlink())
+        self.assertEqual(outside.read_text(), "secret\n")
+        self.assertIn("symlink", out)
+
+    def test_declared_permalink_is_used_for_links(self):
+        self.write("README.md", "[b](docs/b.md)\n")
+        self.write("docs/b.md", "---\npermalink: /custom/\n---\nbody\n")
+        self.run_pages()
+        self.assertIn("[b](/custom/)", self.read("README.md"))
 
 
 class Titles(Base):
@@ -73,7 +115,9 @@ class Titles(Base):
         self.write("README.md", "# Whatever\n")
         self.write("docs/guide.md", "```\n# not this\n```\n# Build guide ##\n")
         self.write("docs/plain.md", "no heading\n")
+        self.write("docs/setext.md", "Setext title\n============\n\ntext\n")
         self.run_pages()
+        self.assertEqual(json.loads(self.front("docs/setext.md")["title"]), "Demo: Setext title")
         self.assertEqual(json.loads(self.front("README.md")["title"]), "Demo")
         self.assertEqual(json.loads(self.front("docs/guide.md")["title"]), "Demo: Build guide")
         self.assertEqual(json.loads(self.front("docs/plain.md")["title"]), "Demo: docs/plain")
@@ -173,6 +217,39 @@ class Links(Base):
         self.assertIn(f'<a href="{GH}/blob/HEAD/data.csv">d</a>', out)
         self.assertIn("<a href='/projects/demo/docs/my%20guide/'>g</a>", out)
         self.assertIn('[ref]: /projects/demo/ "t"', out)
+
+    def test_fence_closes_only_on_a_matching_fence(self):
+        out = self.page("````\n```\n[in](../README.md)\n````\n[out](../README.md)\n~~~\n[t](../README.md)\n```\n~~~\n")
+        self.assertIn("```\n[in](../README.md)\n````\n", out)
+        self.assertIn("[out](/projects/demo/)", out)
+        self.assertIn("~~~\n[t](../README.md)\n```\n~~~", out)
+
+    def test_code_spans_after_a_rewrite(self):
+        # Each [x](../data.csv) grows by ~38 characters when rewritten, which
+        # moves the tags after it into or out of where the code spans were.
+        out = self.page(
+            '[a](../data.csv)[b](../data.csv) <a href="../data.csv">x</a> `' + "c" * 120 + "`\n"
+            '[a](../data.csv)[b](../data.csv)[c](../data.csv) `<a href="../data.csv">`\n'
+        )
+        self.assertIn(f'<a href="{GH}/blob/HEAD/data.csv">x</a>', out)
+        self.assertIn('`<a href="../data.csv">`', out)
+
+    def test_query_strings_are_kept(self):
+        out = self.page("![i](img.png?v=2) [q](../data.csv?raw=1#L2) [p](../README.md?x=1#top)\n")
+        self.assertIn("![i](/projects/demo/docs/img.png?v=2)", out)
+        self.assertIn(f"[q]({GH}/blob/HEAD/data.csv?raw=1#L2)", out)
+        self.assertIn("[p](/projects/demo/?x=1#top)", out)
+
+    def test_reference_style_images(self):
+        out = self.page("![alt][i] ![s]\n\n[i]: img.png\n[s]: img.png\n[l]: ../data.csv\n")
+        self.assertIn("[i]: /projects/demo/docs/img.png", out)
+        self.assertIn("[s]: /projects/demo/docs/img.png", out)
+        self.assertIn(f"[l]: {GH}/blob/HEAD/data.csv", out)
+
+    def test_parentheses_in_a_target(self):
+        self.write("docs/foo_(bar).md", "x\n")
+        out = self.page("[f](foo_(bar).md)\n")
+        self.assertIn("[f](/projects/demo/docs/foo_%28bar%29/)", out)
 
     def test_root_readme_links(self):
         self.write("README.md", "[d](docs/README.md) [g](docs/my%20guide.md#s) [t](TODO.md)\n")
