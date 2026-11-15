@@ -13,5 +13,25 @@
     "name": "Desktop Sheet Press",
     "repo": "uwo-fast/desktop-sheet-press",
     "description": "Control electronics, firmware and enclosure for a heated scientific sheet press."
+  },
+  {
+    "name": "UV Curing Box",
+    "repo": "uwo-fast/uv-curing-box",
+    "description": "A modular UV LED curing box built from identical 80 mm LED boards and printed brackets."
+  },
+  {
+    "name": "Nasopharyngeal Swab",
+    "repo": "uwo-fast/nasopharyngeal-swab",
+    "description": "A parametric OpenSCAD nasopharyngeal swab, printed in resin, with interchangeable printed handles."
+  },
+  {
+    "name": "openreactor",
+    "repo": "uwo-fast/openreactor",
+    "description": "Monitor and control bench-scale reactors from a Raspberry Pi: sensor logging, temperature and motor control, and recorded runs, in a web interface."
+  },
+  {
+    "name": "Feedstock Hopper",
+    "repo": "uwo-fast/feedstock-hopper",
+    "description": "A parametric, printable hopper for plastic pellets and shredded regrind, with bayonet couplings and per-machine mounting plates."
   }
 ]
