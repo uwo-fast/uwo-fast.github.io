@@ -10,11 +10,18 @@ set -euo pipefail
 
 SRC="${PROJECTS_SRC:-}"
 
-mapfile -t repos < <(jq -r '.[].repo' _data/projects.json)
-mapfile -t names < <(jq -r '.[].name' _data/projects.json)
+# Jekyll renders a file only when it opens with front matter; a README without
+# it is copied as a static file and its page 404s (#7). Every README becomes
+# index.md with an explicit permalink, so the URL never depends on how :path
+# treats index files. jq writes the values as JSON strings, which are valid
+# YAML whatever characters a name or directory holds.
+has_front_matter() {
+    [ "$(head -n 1 "$1")" = "---" ] && tail -n +2 "$1" | grep -qx -- "---"
+}
 
-for i in "${!repos[@]}"; do
-    repo="${repos[$i]}"
+while IFS= read -r entry; do
+    repo="$(jq -r '.repo' <<<"$entry")"
+    name="$(jq -r '.name // empty' <<<"$entry")"
     dir="$(basename "$repo")"
     dest="_projects/$dir"
     rm -rf "$dest"
@@ -25,31 +32,31 @@ for i in "${!repos[@]}"; do
         git clone --depth 1 "https://github.com/${repo}.git" "$dest" 2>&1 | sed 's/^/  /'
     fi
 
-    # Jekyll renders a file only when it opens with front matter; a README
-    # without it is copied as a static file and its page 404s (#7). Each
-    # README becomes index.md with a title and an explicit permalink, so the
-    # URL does not depend on how :path treats index files.
     while IFS= read -r -d '' readme; do
         sub="$(dirname "${readme#"$dest"}")"
         sub="${sub#/}"
-        if [ -z "$sub" ] || [ "$sub" = "." ]; then
-            title="${names[$i]}"
-            url="/projects/$dir/"
-        else
-            title="${names[$i]}: $sub"
-            url="/projects/$dir/$sub/"
-        fi
+        [ "$sub" = "." ] && sub=""
+        title="${name:-$dir}${sub:+: $sub}"
+        url="/projects/$dir/${sub:+$sub/}"
         index="$(dirname "$readme")/index.md"
-        if [ "$(head -c 3 "$readme")" = "---" ]; then
-            mv "$readme" "$index"
-            continue
+        tmp="$(mktemp)"
+        if has_front_matter "$readme"; then
+            # Keep the README's own front matter; add a permalink and a title
+            # after its opening line where it sets neither.
+            { head -n 1 "$readme"
+              grep -q '^permalink:' "$readme" || jq -rn --arg u "$url" '"permalink: \($u | tojson)"'
+              grep -q '^title:' "$readme" || jq -rn --arg t "$title" '"title: \($t | tojson)"'
+              tail -n +2 "$readme"; } > "$tmp"
+        else
+            { echo "---"
+              jq -rn --arg t "$title" --arg u "$url" '"title: \($t | tojson)\npermalink: \($u | tojson)"'
+              echo "---"
+              echo
+              cat "$readme"; } > "$tmp"
         fi
-        {
-            printf -- '---\ntitle: "%s"\npermalink: %s\n---\n\n' "${title//\"/\\\"}" "$url"
-            cat "$readme"
-        } > "$index"
         rm "$readme"
-    done < <(find "$dest" -name README.md -not -path '*/.git/*' -print0)
-done
+        mv "$tmp" "$index"
+    done < <(find "$dest" -iname README.md -not -path '*/.git/*' -print0)
+done < <(jq -c '.[]' _data/projects.json)
 
-echo "fetched ${#repos[@]} projects"
+echo "fetched $(jq length _data/projects.json) projects"
