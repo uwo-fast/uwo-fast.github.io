@@ -246,6 +246,18 @@ class Links(Base):
         self.assertIn("[s]: /projects/demo/docs/img.png", out)
         self.assertIn(f"[l]: {GH}/blob/HEAD/data.csv", out)
 
+    def test_reference_image_labels_match_like_kramdown(self):
+        out = self.page("![a][My  Img]\n\n[my img]: img.png\n")
+        self.assertIn("[my img]: /projects/demo/docs/img.png", out)
+
+    def test_byte_order_mark_before_front_matter(self):
+        (self.dest / "docs/bom.md").write_bytes(b"\xef\xbb\xbf---\ntitle: Mine\n---\nbody\n")
+        self.run_pages()
+        text = self.read("docs/bom.md")
+        self.assertTrue(text.startswith("---\n"), text)
+        self.assertEqual(text.count("---"), 2)
+        self.assertEqual(self.front("docs/bom.md")["title"], "Mine")
+
     def test_parentheses_in_a_target(self):
         self.write("docs/foo_(bar).md", "x\n")
         out = self.page("[f](foo_(bar).md)\n")

@@ -107,6 +107,11 @@ def first_heading(lines):
     return None
 
 
+def label_key(label):
+    """A reference label as kramdown matches it: case and whitespace folded."""
+    return " ".join(label.split()).lower()
+
+
 def declared_permalink(lines):
     end = front_matter_end(lines)
     for raw in lines[1:end] if end else []:
@@ -151,7 +156,7 @@ class Project:
                 path.unlink()
                 continue
             try:
-                text = path.read_text(encoding="utf-8")
+                text = path.read_text(encoding="utf-8-sig")
             except UnicodeDecodeError:
                 self.skip(path, "it is not UTF-8")
                 continue
@@ -198,7 +203,7 @@ class Project:
     def rewrite_line(self, here, line, image_labels):
         ref = REF_DEF.match(line)
         if ref:
-            image = ref.group(2).strip().lower() in image_labels
+            image = label_key(ref.group(2)) in image_labels
             new = self.target(here, ref.group(3), image=image)
             return line if new is None else f"{ref.group(1)}{new}{ref.group(4)}"
 
@@ -237,7 +242,7 @@ class Project:
             if not code:
                 for m in REF_IMAGE.finditer(line):
                     if not line[m.end():m.end() + 1] == "(":
-                        image_labels.add((m.group(2) or m.group(1)).strip().lower())
+                        image_labels.add(label_key(m.group(2) or m.group(1)))
 
         out = []
         for raw, (line, code) in zip(body, code_lines(body)):
