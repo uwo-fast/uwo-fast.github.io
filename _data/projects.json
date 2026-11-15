@@ -1,7 +1,7 @@
 [
   {
-    "name": "OpenAgriS3D",
-    "repo": "uwo-fast/OpenAgriS3D",
+    "name": "farm-tools-scad",
+    "repo": "uwo-fast/farm-tools-scad",
     "description": "Parametric 3D printed designs for sustainable small-scale agriculture."
   },
   {
