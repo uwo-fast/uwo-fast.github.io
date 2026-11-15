@@ -38,5 +38,15 @@
     "name": "Syringe Actuator",
     "repo": "uwo-fast/syringe-actuator",
     "description": "A printed crank that strokes a 1 to 30 mL luer syringe's plunger back and forth from a gearmotor that never reverses."
+  },
+  {
+    "name": "Mass Scale",
+    "repo": "uwo-fast/mass-scale",
+    "description": "A 3D-printed digital scale with a load cell, an HX711 and an Arduino Nano, read over serial for data logging, with its 2019 and 2020 predecessors."
+  },
+  {
+    "name": "pipe-fitting-scad",
+    "repo": "uwo-fast/pipe-fitting-scad",
+    "description": "A parametric OpenSCAD generator for threaded pipe couplings: a fitting, nuts and tapered gaskets, with threads from threadlib."
   }
 ]
