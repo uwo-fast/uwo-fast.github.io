@@ -2,16 +2,16 @@
   {
     "name": "farm-tools-scad",
     "repo": "uwo-fast/farm-tools-scad",
-    "description": "Parametric 3D printed designs for sustainable small-scale agriculture."
+    "description": "Parametric OpenSCAD designs for small-scale farming tools."
   },
   {
     "name": "Open Source Bioreactor",
     "repo": "uwo-fast/open-source-bioreactor",
-    "description": "An open-source bioreactor platform for accessible biological research."
+    "description": "A parametric OpenSCAD bioreactor built on glass jars from 1.5 L to 6.5 gal."
   },
   {
     "name": "Desktop Sheet Press",
     "repo": "uwo-fast/desktop-sheet-press",
-    "description": "Open-source desktop sheet press for recycled plastic fabrication."
+    "description": "Control electronics, firmware and enclosure for a heated scientific sheet press."
   }
 ]
