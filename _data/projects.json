@@ -33,5 +33,10 @@
     "name": "Feedstock Hopper",
     "repo": "uwo-fast/feedstock-hopper",
     "description": "A parametric, printable hopper for plastic pellets and shredded regrind, with bayonet couplings and per-machine mounting plates."
+  },
+  {
+    "name": "Syringe Actuator",
+    "repo": "uwo-fast/syringe-actuator",
+    "description": "A printed crank that strokes a 1 to 30 mL luer syringe's plunger back and forth from a gearmotor that never reverses."
   }
 ]
