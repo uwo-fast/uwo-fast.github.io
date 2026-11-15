@@ -9,7 +9,7 @@ uwo-fast GitHub Pages website!
 ### Prerequisites
 
 1. **Install Ruby**  
-   Ensure you have Ruby installed on your system. Use [RubyInstaller](https://rubyinstaller.org/) for Windows or your package manager on macOS/Linux.
+   Ruby 3.2 or later; CI builds with 3.3. Use [RubyInstaller](https://rubyinstaller.org/) for Windows or your package manager on macOS/Linux.
 
 2. **Install Bundler**  
    Bundler manages Ruby gems and dependencies.

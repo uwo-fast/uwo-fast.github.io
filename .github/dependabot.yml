@@ -10,3 +10,14 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: ci
+
+  # The gems in Gemfile.lock.
+  - package-ecosystem: bundler
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      gems:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
