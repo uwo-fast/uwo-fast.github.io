@@ -11,13 +11,13 @@ updates:
     commit-message:
       prefix: ci
 
-  # The gems in Gemfile.lock.
-  - package-ecosystem: bundler
+  # The npm packages in package-lock.json (Astro and Starlight).
+  - package-ecosystem: npm
     directory: /
     schedule:
       interval: monthly
     groups:
-      gems:
+      npm:
         patterns: ["*"]
     commit-message:
       prefix: build

@@ -1,0 +1,76 @@
+---
+// Wraps Starlight's page body. Lab signs and equipment records get the scope
+// notice and status block that every published sign carries, and a footer
+// linking the source and the matching record. Other pages are unchanged.
+import Default from '@astrojs/starlight/components/MarkdownContent.astro';
+import { getCollection } from 'astro:content';
+
+const { entry } = Astro.locals.starlightRoute;
+const data = entry.data;
+const kind = data.kind;
+const name = kind ? entry.id.split('/').pop() : undefined;
+const status = data.status ?? 'draft';
+const notes: Record<string, string> = {
+	review: 'awaiting PI, post-doc, equipment owner or subject-matter review',
+	draft: 'written but not verified',
+	approved: 'reviewed and posted in the lab',
+	retired: 'no longer in use',
+};
+const source =
+	kind === 'sign'
+		? `https://github.com/uwo-fast/uwo-fast/blob/main/lab-signs/${name}.md`
+		: `https://github.com/uwo-fast/uwo-fast/blob/main/equipment/${name}.md`;
+let related: string | undefined;
+if (kind) {
+	const other = kind === 'sign' ? 'equipment' : 'signs';
+	const docs = await getCollection('docs', (e) => e.id === `${other}/${name}`);
+	if (docs.length) related = `/${other}/${name}/`;
+}
+---
+
+{
+	kind === 'sign' && (
+		<div class="sign-scope">
+			<p>
+				<strong>These are the FAST group's own lab signs.</strong> They are written for one lab, its
+				equipment, its layout and its local procedures, and are published so others can see and adapt
+				them. They are not general safety guidance and they are not a substitute for training.
+			</p>
+			<p>
+				If you work somewhere else, follow your own workplace procedures and the requirements of your
+				institution and jurisdiction.
+			</p>
+		</div>
+	)
+}
+{
+	kind && (
+		<div class={`sign-status sign-status--${status}`}>
+			<span class="sign-status__state">{status}</span>
+			{notes[status] && <span class="sign-status__note">{notes[status]}</span>}
+			<span class="sign-status__meta">
+				{data.version && `v${data.version}`}
+				{data.review_owner && ` \u00b7 review owner: ${data.review_owner}`}
+				{data.record_owner && ` \u00b7 record owner: ${data.record_owner}`}
+				{data.last_updated && ` \u00b7 updated ${data.last_updated}`}
+			</span>
+			{data.equipment && <span class="sign-status__meta">{data.equipment}</span>}
+		</div>
+	)
+}
+<Default><slot /></Default>
+{
+	kind && (
+		<p class="sign-source">
+			Source: <a href={source}>{kind === 'sign' ? 'lab-signs' : 'equipment'}/{name}.md</a>
+			{related && (
+				<>
+					{' \u00b7 '}
+					<a href={related}>{kind === 'sign' ? 'equipment record' : 'lab sign'}</a>
+				</>
+			)}
+			{' \u00b7 '}
+			<a href="/signs/">all signs and records</a>
+		</p>
+	)
+}

@@ -1,15 +1,11 @@
 ---
-layout: page
 title: "Contact Us"
-permalink: /contact/
 ---
-
-# Contact Us
 
 For inquiries, please contact:
 
-**Joshua M. Pearce, Ph.D., FCAE**
-_John M. Thompson Chair in Information Technology and Innovation_
+**Joshua M. Pearce, Ph.D., FCAE**  
+_John M. Thompson Chair in Information Technology and Innovation_  
 Thompson Centre for Engineering Leadership & Innovation  
 Ivey Business School  
 Department of Electrical & Computer Engineering  

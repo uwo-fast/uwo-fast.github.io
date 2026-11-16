@@ -1,0 +1,29 @@
+---
+// Lists the lab signs or the equipment records, sorted by title.
+import { getCollection } from 'astro:content';
+
+interface Props {
+	kind: 'sign' | 'equipment';
+}
+const { kind } = Astro.props;
+const docs = (await getCollection('docs', (e) => e.data.kind === kind)).sort((a, b) =>
+	a.data.title.localeCompare(b.data.title)
+);
+---
+
+<ul>
+	{
+		docs.map((d) => (
+			<li>
+				<a href={`/${d.id}/`}>{d.data.title}</a>
+				{kind === 'sign' && (
+					<>
+						{' - '}
+						{d.data.status ?? 'draft'}
+						{d.data.last_updated && `, updated ${d.data.last_updated}`}
+					</>
+				)}
+			</li>
+		))
+	}
+</ul>

@@ -1,0 +1,176 @@
+/* Western University colours
+ * Primary: Western Purple #4F2683, white
+ * Secondary: Orchid #8F55E0, Deep Focus #201436, grey #818284
+ * Accent: Tiger #F0A757 (kept for highlights, sparingly)
+ */
+:root {
+	--western-purple: #4f2683;
+	--western-orchid: #8f55e0;
+	--western-deep-focus: #201436;
+	--western-grey: #818284;
+	--western-tiger: #f0a757;
+}
+
+/* Dark theme (Starlight's default) */
+:root {
+	--sl-color-accent-low: #2a1a47;
+	--sl-color-accent: #8f55e0;
+	--sl-color-accent-high: #e0d2f7;
+	--sl-color-white: #ffffff;
+	--sl-color-gray-1: #ece8f3;
+	--sl-color-gray-2: #c8c1d6;
+	--sl-color-gray-3: #9d94ae;
+	--sl-color-gray-4: #5e5670;
+	--sl-color-gray-5: #3c3550;
+	--sl-color-gray-6: #2a2440;
+	--sl-color-black: #18122a;
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: #e6dcf3;
+	--sl-color-accent: #4f2683;
+	--sl-color-accent-high: #201436;
+	--sl-color-white: #201436;
+	--sl-color-gray-1: #2d2540;
+	--sl-color-gray-2: #463d5a;
+	--sl-color-gray-3: #6a6080;
+	--sl-color-gray-4: #9d94ae;
+	--sl-color-gray-5: #cfc8dc;
+	--sl-color-gray-6: #ece8f3;
+	--sl-color-gray-7: #f7f5fa;
+	--sl-color-black: #ffffff;
+}
+
+/* The page header carries the Western purple bar in both themes. Scoped to
+ * the page-level <header>: code blocks have their own `.header` too. */
+.page > header.header {
+	background-color: var(--western-purple);
+	border-bottom-color: var(--western-deep-focus);
+}
+.page > header.header .site-title,
+.page > header.header .site-title:hover {
+	color: #ffffff;
+}
+.page > header.header starlight-theme-select select,
+.page > header.header starlight-theme-select svg,
+.page > header.header .social-icons a {
+	color: #ffffff;
+}
+
+/* Lab signs and equipment records ------------------------------------ */
+
+.sign-scope {
+	border-inline-start: 4px solid var(--sl-color-accent);
+	background-color: var(--sl-color-accent-low);
+	padding: 0.75rem 1rem;
+	margin-bottom: 1rem;
+	font-size: var(--sl-text-sm);
+}
+.sign-scope p {
+	margin: 0.4rem 0;
+}
+
+.sign-status {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.5rem 0.75rem;
+	padding: 0.6rem 1rem;
+	margin-bottom: 1.5rem;
+	border-radius: 0.25rem;
+	border: 1px solid var(--sl-color-gray-4);
+}
+.sign-status__state {
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+.sign-status__note {
+	font-style: italic;
+}
+.sign-status__meta {
+	color: var(--sl-color-gray-3);
+	font-size: var(--sl-text-sm);
+	flex-basis: 100%;
+}
+
+/* A posted sign and an unverified one must not look alike. */
+.sign-status--review {
+	border-color: var(--western-tiger);
+	background-color: color-mix(in srgb, var(--western-tiger) 15%, transparent);
+}
+.sign-status--approved {
+	border-color: #6a9c3a;
+	background-color: color-mix(in srgb, #6a9c3a 15%, transparent);
+}
+.sign-status--retired {
+	opacity: 0.7;
+}
+
+.sign-source {
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-3);
+}
+
+/* Project cards ------------------------------------------------------ */
+
+.project-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+}
+.project-card {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.5rem;
+	overflow: hidden;
+	text-decoration: none;
+	color: inherit;
+	background-color: var(--sl-color-black);
+	transition: border-color 0.15s ease;
+}
+.project-card:hover {
+	border-color: var(--sl-color-accent);
+}
+/* height: auto, or the width and height attributes Astro writes on the
+ * image keep its own proportions and the 4:3 crop never applies. */
+.project-card__image {
+	aspect-ratio: 4 / 3;
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+	background-color: var(--sl-color-gray-6);
+}
+.project-card__placeholder {
+	aspect-ratio: 4 / 3;
+	display: grid;
+	place-items: center;
+	background-color: var(--sl-color-accent-low);
+}
+.project-card__placeholder img {
+	grid-area: 1 / 1;
+	width: 35%;
+	height: auto;
+	opacity: 0.35;
+}
+.project-section h2 {
+	margin-top: 2.5rem;
+}
+.project-card__body {
+	padding: 0.75rem 1rem 1rem;
+}
+.project-card__body strong {
+	display: block;
+	color: var(--sl-color-white);
+	font-size: var(--sl-text-lg);
+}
+.project-card__body p {
+	margin: 0.35rem 0 0;
+	font-size: var(--sl-text-sm);
+	color: var(--sl-color-gray-2);
+}
+.sl-markdown-content .project-grid a.project-card {
+	text-decoration: none;
+}
