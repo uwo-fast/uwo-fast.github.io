@@ -199,7 +199,8 @@ class Project:
             full = self.dest / path
             if full.is_file() and not full.is_symlink():
                 self.images.add(path)
-                return quote(f"/projects/{self.dir}/{path}") + query + frag
+                # "+" is literal in a path; some servers do not decode %2B.
+                return quote(f"/projects/{self.dir}/{path}", safe="/+") + query + frag
             return None
         if path in self.pages:
             return quote(self.pages[path]) + query + frag

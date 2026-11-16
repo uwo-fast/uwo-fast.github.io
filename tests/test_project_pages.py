@@ -212,6 +212,11 @@ class Links(Base):
         self.assertIn('<img src="/projects/demo/docs/img.png" alt="a">', out)
         self.assertIn(f"[![i](/projects/demo/docs/img.png)]({GH}/blob/HEAD/data.csv)", out)
 
+    def test_plus_in_an_image_path_is_kept(self):
+        self.write("docs/a+b.png", "x")
+        out = self.page("![p](a+b.png)\n")
+        self.assertIn("![p](/projects/demo/docs/a+b.png)", out)
+
     def test_html_links_and_reference_definitions(self):
         out = self.page('<a href="../data.csv">d</a> <a href=\'my guide.md\'>g</a>\n\n[ref]: ../README.md "t"\n')
         self.assertIn(f'<a href="{GH}/blob/HEAD/data.csv">d</a>', out)
