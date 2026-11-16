@@ -1,6 +1,6 @@
 [
   {
-    "name": "farm-tools-scad",
+    "name": "Farm Tools",
     "repo": "uwo-fast/farm-tools-scad",
     "description": "Parametric OpenSCAD designs for small-scale farming tools."
   },
@@ -25,7 +25,7 @@
     "description": "A parametric OpenSCAD nasopharyngeal swab, printed in resin, with a lock or tong handle printed on an FFF printer."
   },
   {
-    "name": "openreactor",
+    "name": "OpenReactor",
     "repo": "uwo-fast/openreactor",
     "description": "Supervise bench-scale reactors from a Raspberry Pi: sensor logging, heater and motor setpoints, and recorded runs, in a web interface."
   },
@@ -45,7 +45,7 @@
     "description": "A 3D-printed digital scale with a load cell, an HX711 and an Arduino Nano, read over serial for data logging, with its 2019 and 2020 predecessors."
   },
   {
-    "name": "pipe-fitting-scad",
+    "name": "Pipe Fitting Generator",
     "repo": "uwo-fast/pipe-fitting-scad",
     "description": "A parametric OpenSCAD generator for threaded pipe couplings: a fitting, nuts and tapered gaskets, with threads from threadlib."
   }
