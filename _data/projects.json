@@ -48,5 +48,10 @@
     "name": "Pipe Fitting Generator",
     "repo": "uwo-fast/pipe-fitting-scad",
     "description": "A parametric OpenSCAD generator for threaded pipe couplings: a fitting, nuts and tapered gaskets, with threads from threadlib."
+  },
+  {
+    "name": "AMBB Breakout Board",
+    "repo": "uwo-fast/ambb",
+    "description": "A 3D-printed, solderless adapter that plugs an 8-SOIC chip into a breadboard like a DIP part."
   }
 ]
