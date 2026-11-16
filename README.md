@@ -1,146 +1,90 @@
 # uwo-fast.github.io
 
-uwo-fast GitHub Pages website!
+The website of the Free Appropriate Sustainability Technology (FAST) Research Group at
+Western University: <https://uwo-fast.github.io/>.
 
-> 🌐 **Served fresh at:** [uwo-fast.github.io](https://uwo-fast.github.io/)
+It is built with [Astro](https://astro.build/) and
+[Starlight](https://starlight.astro.build/) and deployed to GitHub Pages by
+`.github/workflows/pages.yml`, on every push to `main`, daily, and on demand.
 
-## Jekyll Development Primer
+## What is on it
 
-### Prerequisites
+- **Projects.** Each repository listed in `src/data/projects.json` gets a page rendered
+  from its own README and `docs/`. `scripts/fetch-projects.sh` copies each repository
+  into a temporary directory, and `scripts/project-pages.py` writes its pages into
+  `src/content/docs/projects/<repo>/` and the images those pages use into
+  `public/projects/<repo>/`. Links to anything else in the repository go to GitHub.
+- **Lab signs and equipment records.** `scripts/fetch-signs.sh` copies them from
+  `lab-signs/` and `equipment/` in [uwo-fast/uwo-fast](https://github.com/uwo-fast/uwo-fast)
+  into `src/content/docs/signs/` and `src/content/docs/equipment/`.
+- **The home, About, Contact and 404 pages**, in `src/content/docs/`.
 
-1. **Install Ruby**  
-   Ruby 3.2 or later; CI builds with 3.3. Use [RubyInstaller](https://rubyinstaller.org/) for Windows or your package manager on macOS/Linux.
+The fetched content is not committed; the build fetches it fresh each time.
 
-2. **Install Bundler**  
-   Bundler manages Ruby gems and dependencies.
+### The sign URLs are a contract
 
-   ```
-   gem install bundler
-   ```
+`/signs/<slug>/` and `/equipment/<slug>/` are printed onto QR codes posted in the lab.
+`scripts/required-urls.txt` lists every one, and `npm run check-urls` fails the build
+if any is missing. Add a sign to that list when it is first printed, and never remove
+one.
 
-3. **Install Jekyll**  
-   Install Jekyll globally (optional if using Bundler to manage dependencies).
-   ```
-   gem install jekyll
-   ```
+## Working on the site
 
-### Installation
+Requires Node 24 (`.nvmrc`), Python 3, `jq` and `git`.
 
-1. **Clone the Repository**
+```sh
+npm ci
+npm run fetch        # clone the projects and signs and render them
+npm run dev          # http://localhost:4321/
+npm run build        # the site, in dist/
+npm run check-urls   # every required URL is in dist/
+python3 -m unittest discover tests
+```
 
-   ```
-   git clone https://github.com/uwo-fast/uwo-fast.github.io.git
-   cd uwo-fast.github.io
-   ```
+To render from local checkouts instead of cloning, set `PROJECTS_SRC` to the directory
+holding them and `SIGNS_SRC` to a checkout of uwo-fast/uwo-fast:
 
-2. **Install Dependencies**
-   Use Bundler to install all required gems.
-   ```
-   bundle install
-   ```
+```sh
+PROJECTS_SRC=.. SIGNS_SRC=../uwo-fast npm run fetch
+```
 
-### Building the Site Locally
+A local checkout is read with `git archive`, which gives Git LFS pointers rather than
+the files, so an LFS image shows as broken locally. The deployed site clones, and has
+them.
 
-1. **Serve the Site**
-   Start the local development server:
+### Listing a project
 
-   ```
-   bundle exec jekyll serve
-   ```
+Add an entry to `src/data/projects.json`:
 
-2. **Access the Site**  
-   Once the server starts, the local development address will be printed in the console (e.g., `http://127.0.0.1:4000` or `http://localhost:4000`).  
-   Open this address in your browser to view the site.
+```json
+{
+  "name": "Display Name",
+  "repo": "uwo-fast/repo-name",
+  "area": "equipment",
+  "description": "One line for its card.",
+  "image": "docs/images/photo.jpg"
+}
+```
 
-### Cleaning the Environment
+`area` is one of the ids in `src/data/areas.json`. The home page, the projects page
+and the sidebar group projects by area, and hide an area with no projects. `image`
+is optional: a path in the repository to a picture for the project's card.
 
-1. **Remove Generated Files**
-   Clean up previously built site files.
+## Design
 
-   ```
-   bundle exec jekyll clean
-   ```
+The colours are Western University's, set in `src/styles/theme.css`:
 
-2. **Reinstall Dependencies**
-   If you suspect dependency issues, remove the `Gemfile.lock` and reinstall:
+| Colour | Hex | Use |
+| --- | --- | --- |
+| Western Purple | `#4F2683` | header, links and accents (light theme) |
+| Orchid | `#8F55E0` | accents (dark theme) |
+| Deep Focus | `#201436` | text on accent backgrounds |
+| Grey | `#818284` | |
+| Tiger | `#F0A757` | signs awaiting review |
 
-   ```
-   rm Gemfile.lock
-   bundle install
-   ```
-
-3. **Update Submodules** (if your site uses Git submodules):
-   ```
-   git submodule update --init --recursive
-   ```
-
-## Western University Brand Colors
-
-### Primary Colors
-
-- **Western Purple**
-
-  - **Print PMS**: 268 C
-  - **Print CMYK**: 82, 100, 0, 12
-  - **Digital RGB**: 79, 38, 131
-  - **Web Hex**: `#4F2683`
-
-- **White**
-  - **Print PMS**: N/A
-  - **Print CMYK**: 0, 0, 0, 0
-  - **Digital RGB**: 255, 255, 255
-  - **Web Hex**: `#FFFFFF`
-
-### Secondary Colors
-
-- **Orchid**
-
-  - **Print PMS**: 265 C
-  - **Print CMYK**: N/A
-  - **Digital RGB**: 154, 100, 246
-  - **Web Hex**: `#8F55E0`
-
-- **Deep Focus**
-
-  - **Print PMS**: 275 C
-  - **Print CMYK**: 85, 90, 45, 60
-  - **Digital RGB**: 32, 20, 54
-  - **Web Hex**: `#201436`
-
-- **Black**
-
-  - **Print PMS**: BLACK 6C
-  - **Print CMYK**: 0, 0, 0, 100
-  - **Digital RGB**: 0, 0, 0
-  - **Web Hex**: `#000000`
-
-- **Grey**
-  - **Print PMS**: COOL GRAY 6C
-  - **Print CMYK**: 0, 0, 0, 60
-  - **Digital RGB**: 129, 130, 132
-  - **Web Hex**: `#818284`
-
-### Accent Colors
-
-- **Sky**
-
-  - **Print CMYK**: 40, 0, 0, 0
-  - **Digital RGB**: 125, 234, 250
-  - **Web Hex**: `#7DEAFB`
-
-- **Spring**
-
-  - **Print CMYK**: 40, 0, 80, 0
-  - **Digital RGB**: 185, 248, 118
-  - **Web Hex**: `#B9F876`
-
-- **Vivid**
-
-  - **Print CMYK**: 5, 0, 75, 0
-  - **Digital RGB**: 252, 240, 94
-  - **Web Hex**: `#FCF05E`
-
-- **Tiger**
-  - **Print CMYK**: 0, 20, 80, 0
-  - **Digital RGB**: 240, 167, 87
-  - **Web Hex**: `#F0A757`
+The FAST logo is by Joshua M. Pearce, from
+[Appropedia](https://www.appropedia.org/File:Purplefast.png), under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+`src/assets/fast-logo-purple.png` is that logo resized;
+`src/assets/fast-logo-light.png` is the same logo in light lavender, for the purple
+header and the dark theme.
