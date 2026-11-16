@@ -53,5 +53,10 @@
     "name": "AMBB Breakout Board",
     "repo": "uwo-fast/ambb",
     "description": "A 3D-printed, solderless adapter that plugs an 8-SOIC chip into a breadboard like a DIP part."
+  },
+  {
+    "name": "Well Plate Pipette Guide",
+    "repo": "uwo-fast/well-plate-guide",
+    "description": "A parametric OpenSCAD guide that steers a pipette tip into the centre of each well of a standard well plate."
   }
 ]
