@@ -2,61 +2,80 @@
   {
     "name": "Farm Tools",
     "repo": "uwo-fast/farm-tools-scad",
+    "area": "food",
     "description": "Parametric OpenSCAD designs for small-scale farming tools."
   },
   {
     "name": "Open Source Bioreactor",
     "repo": "uwo-fast/open-source-bioreactor",
+    "area": "equipment",
     "description": "A parametric OpenSCAD bioreactor built on glass jars from 1.5 L to 6.5 gal."
   },
   {
     "name": "Desktop Sheet Press",
     "repo": "uwo-fast/desktop-sheet-press",
-    "description": "Control electronics, firmware and enclosure for a heated scientific sheet press."
+    "area": "dram",
+    "description": "Control electronics, firmware and enclosure for a heated scientific sheet press.",
+    "image": "docs/electrical_enclosure_isometric.PNG"
   },
   {
     "name": "UV Curing Box",
     "repo": "uwo-fast/uv-curing-box",
-    "description": "A modular UV LED curing box built from identical 80 mm LED boards and printed brackets."
+    "area": "biomed",
+    "description": "A modular UV LED curing box built from identical 80 mm LED boards and printed brackets.",
+    "image": "docs/images/lab-rebuild.jpg"
   },
   {
     "name": "Nasopharyngeal Swab",
     "repo": "uwo-fast/nasopharyngeal-swab",
-    "description": "A parametric OpenSCAD nasopharyngeal swab, printed in resin, with a lock or tong handle printed on an FFF printer."
+    "area": "biomed",
+    "description": "A parametric OpenSCAD nasopharyngeal swab, printed in resin, with a lock or tong handle printed on an FFF printer.",
+    "image": "docs/sl1_build_plate.jpg"
   },
   {
     "name": "OpenReactor",
     "repo": "uwo-fast/openreactor",
+    "area": "equipment",
     "description": "Supervise bench-scale reactors from a Raspberry Pi: sensor logging, heater and motor setpoints, and recorded runs, in a web interface."
   },
   {
     "name": "Feedstock Hopper",
     "repo": "uwo-fast/feedstock-hopper",
+    "area": "dram",
     "description": "A parametric, printable hopper for plastic pellets and shredded regrind, with bayonet couplings and per-machine mounting plates."
   },
   {
     "name": "Syringe Actuator",
     "repo": "uwo-fast/syringe-actuator",
-    "description": "A printed crank that strokes a 1 to 30 mL luer syringe's plunger back and forth from a gearmotor that never reverses."
+    "area": "equipment",
+    "description": "A printed crank that strokes a 1 to 30 mL luer syringe's plunger back and forth from a gearmotor that never reverses.",
+    "image": "docs/images/mechanism.png"
   },
   {
     "name": "Mass Scale",
     "repo": "uwo-fast/mass-scale",
-    "description": "A 3D-printed digital scale with a load cell, an HX711 and an Arduino Nano, read over serial for data logging, with its 2019 and 2020 predecessors."
+    "area": "equipment",
+    "description": "A 3D-printed digital scale with a load cell, an HX711 and an Arduino Nano, read over serial for data logging, with its 2019 and 2020 predecessors.",
+    "image": "docs/images/Oscale.png"
   },
   {
     "name": "Pipe Fitting Generator",
     "repo": "uwo-fast/pipe-fitting-scad",
-    "description": "A parametric OpenSCAD generator for threaded pipe couplings: a fitting, nuts and tapered gaskets, with threads from threadlib."
+    "area": "dram",
+    "description": "A parametric OpenSCAD generator for threaded pipe couplings: a fitting, nuts and tapered gaskets, with threads from threadlib.",
+    "image": "docs/manufactured.jpg"
   },
   {
     "name": "AMBB Breakout Board",
     "repo": "uwo-fast/ambb",
-    "description": "A 3D-printed, solderless adapter that plugs an 8-SOIC chip into a breadboard like a DIP part."
+    "area": "equipment",
+    "description": "A 3D-printed, solderless adapter that plugs an 8-SOIC chip into a breadboard like a DIP part.",
+    "image": "assets/images/testing2-1200.jpg"
   },
   {
     "name": "Well Plate Pipette Guide",
     "repo": "uwo-fast/well-plate-guide",
+    "area": "equipment",
     "description": "A parametric OpenSCAD guide that steers a pipette tip into the centre of each well of a standard well plate."
   }
 ]

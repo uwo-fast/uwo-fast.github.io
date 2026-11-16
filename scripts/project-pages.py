@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Turn one fetched project into site pages.
 
-    project-pages.py <dest> <owner/repo> <name>
+    project-pages.py <clone> <owner/repo> <name> <content-root> <public-root> [card-image] [assets-root]
 
-<dest> is the project's directory under _projects/. The root README and every
-Markdown file under docs/ become pages, each with an explicit permalink, so a
-URL never depends on how Jekyll treats README or index files. Every other .md
-file is deleted rather than published as raw text (#9).
+<clone> is a throwaway copy of the project. The root README and every Markdown
+file under docs/ become pages, each with an explicit URL, so a URL never
+depends on how the site generator treats README or index files. Every other .md
+file is dropped rather than published as raw text (#9).
 
 Relative links in those pages are rewritten: a link to another rendered page
 goes to that page, and a link to anything else in the repository goes to the
 file on GitHub. An image in the repository is pointed at its copy on the site,
-since the files beside the pages are still published.
+and only those images are copied there (#23).
 
 A file that cannot become a page (two files for one URL, not UTF-8, a symlink)
 is skipped with a warning rather than failing the fetch: the same build keeps
@@ -112,6 +112,19 @@ def label_key(label):
     return " ".join(label.split()).lower()
 
 
+def yaml_scalar(value):
+    """A one-line YAML scalar as written here: JSON-quoted, single-quoted or plain."""
+    value = value.strip()
+    if value[:1] == '"':
+        try:
+            return json.loads(value)
+        except ValueError:
+            return value.strip('"')
+    if value[:1] == "'" and value[-1:] == "'":
+        return value[1:-1].replace("''", "'")
+    return value
+
+
 def declared_permalink(lines):
     end = front_matter_end(lines)
     for raw in lines[1:end] if end else []:
@@ -130,6 +143,7 @@ class Project:
         self.dir = dest.name
         self.pages = {}  # repo-relative path -> permalink
         self.texts = {}
+        self.images = set()  # repo-relative paths of images the pages use
 
     def skip(self, path, why):
         warn(f"{self.dir}: not publishing {path.relative_to(self.dest).as_posix()}: {why}")
@@ -182,7 +196,9 @@ class Project:
         if image:
             # Pages are served one directory deeper than their source file
             # (docs/a.md -> docs/a/), so a relative image path would miss.
-            if (self.dest / path).is_file():
+            full = self.dest / path
+            if full.is_file() and not full.is_symlink():
+                self.images.add(path)
                 return quote(f"/projects/{self.dir}/{path}") + query + frag
             return None
         if path in self.pages:
@@ -272,8 +288,75 @@ class Project:
             self.render(rel, url)
         return len(self.pages)
 
+    def inside(self, rel):
+        """The file at rel, if it really lies inside the project (no symlink out)."""
+        root = self.dest.resolve()
+        full = (self.dest / rel).resolve()
+        if full != root and root in full.parents and full.is_file():
+            return full
+        return None
+
+    def publish(self, content, public, card=None, assets=None):
+        """Copy the rendered pages and the images they use into the site.
+
+        Each page goes to <content>/<url>/index.md with Starlight front matter: its
+        title, and its URL as the slug, so the URL does not depend on where the
+        file sits. Its own front matter is not carried over, and a leading
+        level-1 heading is dropped, because Starlight prints the title as one.
+        Only images a page references are copied to <public>; every other file
+        in the repository stays on GitHub (#23). The card image, if any, goes to
+        <assets>/<dir><ext> for the home page to optimise.
+        """
+        for rel, url in self.pages.items():
+            lines = (self.dest / rel).read_text(encoding="utf-8").splitlines(keepends=True)
+            end = front_matter_end(lines)
+            head, body = lines[: end + 1], lines[end + 1 :]
+            title = next((yaml_scalar(l.split(":", 1)[1]) for l in head if l.startswith("title:")), self.name)
+            for i, (line, code) in enumerate(code_lines(body)):
+                if code or not line.strip():
+                    if code:
+                        break
+                    continue
+                if re.match(r"^ {0,3}# +", line):
+                    rest = body[i + 1 :]
+                    while rest and not rest[0].strip():
+                        rest = rest[1:]
+                    body = body[:i] + rest
+                break
+            slug = url.strip("/")
+            out = content / slug / "index.md"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(
+                "---\n" f"title: {json.dumps(title)}\n" f"slug: {json.dumps(slug)}\n" "---\n" + "".join(body),
+                encoding="utf-8",
+            )
+        copied = 0
+        for rel in sorted(self.images):
+            src = self.inside(rel)
+            if src is None:
+                warn(f"{self.dir}: not copying {rel}: it is not a file inside the repository")
+                continue
+            out = public / "projects" / self.dir / rel
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(src.read_bytes())
+            copied += 1
+        if card:
+            src = self.inside(card)
+            if src is None:
+                warn(f"{self.dir}: card image {card} is not a file inside the repository")
+            else:
+                assets.mkdir(parents=True, exist_ok=True)
+                (assets / f"{self.dir}{src.suffix.lower()}").write_bytes(src.read_bytes())
+        return copied
+
 
 if __name__ == "__main__":
-    dest, repo, name = sys.argv[1:4]
-    count = Project(Path(dest), repo, name).run()
-    print(f"  {Path(dest).name}: {count} pages")
+    # project-pages.py <clone> <owner/repo> <name> <content-root> <public-root> [card-image] [assets-root]
+    args = sys.argv[1:]
+    src, repo, name, content, public = args[:5]
+    card = args[5] if len(args) > 5 and args[5] else None
+    assets = Path(args[6]) if len(args) > 6 else None
+    project = Project(Path(src), repo, name)
+    count = project.run()
+    images = project.publish(Path(content), Path(public), card, assets)
+    print(f"  {Path(src).name}: {count} pages, {images} images")

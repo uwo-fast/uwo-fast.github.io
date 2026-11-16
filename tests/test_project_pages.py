@@ -273,5 +273,77 @@ class Links(Base):
         self.assertIn(f"[t]({GH}/blob/HEAD/TODO.md)", out)
 
 
+class Publish(Base):
+    """What reaches the site: the pages and only the images they use (#23)."""
+
+    def setUp(self):
+        super().setUp()
+        self.site = Path(self.tmp.name) / "site"
+        self.content = self.site / "content"
+        self.public = self.site / "public"
+        self.assets = self.site / "assets"
+
+    def publish(self, card=None):
+        project = pp.Project(self.dest, REPO, "Demo")
+        project.run()
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            project.publish(self.content, self.public, card, self.assets)
+        return out.getvalue()
+
+    def published(self):
+        return sorted(p.relative_to(self.site).as_posix() for p in self.site.rglob("*") if p.is_file())
+
+    def test_only_pages_and_the_images_they_use_are_published(self):
+        self.write("README.md", "# Demo\n\n![a](docs/used.png)\n")
+        self.write("docs/guide.md", '# Guide\n\n<img src="img/also.jpg">\n')
+        self.write("docs/used.png", "png")
+        self.write("docs/img/also.jpg", "jpg")
+        self.write("docs/unused.png", "png")
+        self.write("justfile", "x\n")
+        self.write("cad/part.scad", "cube(1);\n")
+        self.publish()
+        self.assertEqual(
+            self.published(),
+            [
+                "content/projects/demo/docs/guide/index.md",
+                "content/projects/demo/index.md",
+                "public/projects/demo/docs/img/also.jpg",
+                "public/projects/demo/docs/used.png",
+            ],
+        )
+
+    def test_page_front_matter_is_title_and_slug_and_the_leading_h1_goes(self):
+        self.write("README.md", "---\nnav_order: 1\n---\n\n# Demo repo\n\nIntro.\n\n# Later heading\n")
+        self.write("docs/guide.md", "# Build guide\n\nText.\n")
+        self.publish()
+        readme = (self.content / "projects/demo/index.md").read_text()
+        self.assertEqual(readme, '---\ntitle: "Demo"\nslug: "projects/demo"\n---\n\nIntro.\n\n# Later heading\n')
+        guide = (self.content / "projects/demo/docs/guide/index.md").read_text()
+        self.assertTrue(guide.startswith('---\ntitle: "Demo: Build guide"\nslug: "projects/demo/docs/guide"\n---\n'), guide)
+        self.assertNotIn("# Build guide", guide)
+
+    def test_a_heading_inside_a_leading_code_block_is_kept(self):
+        self.write("README.md", "```\n# not a title\n```\n")
+        self.publish()
+        self.assertIn("# not a title", (self.content / "projects/demo/index.md").read_text())
+
+    def test_an_image_that_leaves_the_repository_is_not_copied(self):
+        outside = Path(self.tmp.name) / "secret.png"
+        outside.write_text("secret")
+        (self.dest / "docs").mkdir()
+        (self.dest / "docs/link").symlink_to(Path(self.tmp.name), target_is_directory=True)
+        self.write("README.md", "![s](docs/link/secret.png)\n")
+        out = self.publish()
+        self.assertFalse((self.public / "projects/demo/docs/link/secret.png").exists())
+        self.assertIn("not copying docs/link/secret.png", out)
+
+    def test_card_image_goes_to_assets_under_the_project_name(self):
+        self.write("README.md", "x\n")
+        self.write("docs/photo.JPG", "jpg")
+        self.publish(card="docs/photo.JPG")
+        self.assertEqual((self.assets / "demo.jpg").read_text(), "jpg")
+        self.assertFalse((self.public / "projects/demo/docs/photo.JPG").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

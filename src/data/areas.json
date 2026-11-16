@@ -1,0 +1,27 @@
+[
+  {
+    "id": "equipment",
+    "title": "Scientific Equipment and Instrumentation",
+    "summary": "Open-source lab equipment that a lab can build, repair and modify for a fraction of the commercial cost."
+  },
+  {
+    "id": "dram",
+    "title": "Distributed Recycling and Additive Manufacturing",
+    "summary": "Turning waste plastic into feedstock, and printing useful parts locally."
+  },
+  {
+    "id": "biomed",
+    "title": "Frugal Biomedical",
+    "summary": "Low-cost medical devices that can be made where they are needed."
+  },
+  {
+    "id": "food",
+    "title": "Resilient and Alternative Food",
+    "summary": "Tools for small farms and food production that keeps working when supply chains do not."
+  },
+  {
+    "id": "pv",
+    "title": "Solar Photovoltaics",
+    "summary": "Cheaper, more effective solar power, from open-source monitoring to agrivoltaics."
+  }
+]

@@ -1,10 +1,13 @@
-_site
-.sass-cache
-.jekyll-cache
-.jekyll-metadata
-vendor
-_projects/
-.bundle/
-_signs/
-_equipment/
+# Build output and tooling
+node_modules/
+dist/
+.astro/
 __pycache__/
+
+# Written by scripts/fetch-projects.sh and scripts/fetch-signs.sh at build time.
+# The index pages beside them are tracked.
+src/content/docs/projects/*/
+src/content/docs/signs/*.md
+src/content/docs/equipment/
+public/projects/
+src/assets/projects/

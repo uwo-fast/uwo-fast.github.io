@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Pull the FAST lab signs and equipment records into Jekyll collections.
+# Pull the FAST lab signs and equipment records into the site's content.
 #
 # Runs in CI and locally, on purpose. Issue #2 was pages that built locally and
 # 404ed on Pages; the way to not repeat that is one code path for both.
@@ -21,12 +21,31 @@ fi
 
 [ -d "$SRC/lab-signs" ] || { echo "no lab-signs/ in $SRC" >&2; exit 1; }
 
-rm -rf _signs _equipment
-mkdir -p _signs _equipment
+SIGNS=src/content/docs/signs
+EQUIP=src/content/docs/equipment
+rm -f "$SIGNS"/*.md
+rm -rf "$EQUIP"
+mkdir -p "$SIGNS" "$EQUIP"
+
+# Write one document with the site's front matter: its URL as the slug (the
+# repo's own slug is only the last segment), what kind of page it is, and the
+# date it last changed. The leading level-1 heading repeats the title, which
+# the page prints anyway, so it is dropped.
+emit() { # <src> <out> <kind> <slug> <updated>
+    awk -v kind="$3" -v slug="$4" -v d="$5" '
+        NR == 1 && /^---$/ { fm = 1; print; print "kind: \"" kind "\""; print "slug: \"" slug "\""
+                             if (d != "") print "last_updated: \"" d "\""; next }
+        fm && /^---$/ { fm = 0; body = 1; print; next }
+        fm && /^(slug|last_updated|kind):/ { next }
+        body && !h1done && /^# / { h1done = 1; next }
+        body && !h1done && /[^[:space:]]/ { h1done = 1 }
+        { print }
+    ' "$1" > "$2"
+}
 
 # The URL is a contract: /signs/<slug>/ is printed onto QR codes that cannot be
-# recalled. Jekyll derives that path from the filename, so a filename that has
-# drifted from its slug would silently move a published sign. Fail instead.
+# recalled. The page takes that path from the slug, so a filename that has
+# drifted from its slug is a sign whose source and URL disagree. Fail instead.
 fail=0
 for f in "$SRC"/lab-signs/*.md; do
     b="$(basename "$f")"
@@ -47,12 +66,7 @@ for f in "$SRC"/lab-signs/*.md; do
 
     # Mirror the date the PDF footer shows, which the sign build takes from git.
     updated="$(git -C "$SRC" log -1 --format=%cs -- "lab-signs/$b" 2>/dev/null || true)"
-    if [ -n "$updated" ]; then
-        awk -v d="$updated" 'NR==1 && /^---$/ {print; print "last_updated: \"" d "\""; next} {print}' \
-            "$f" > "_signs/$b"
-    else
-        cp "$f" "_signs/$b"
-    fi
+    emit "$f" "$SIGNS/$b" sign "signs/$slug" "$updated"
 done
 [ "$fail" -eq 0 ] || exit 1
 
@@ -60,7 +74,8 @@ if [ -d "$SRC/equipment" ]; then
     for f in "$SRC"/equipment/*.md; do
         b="$(basename "$f")"
         case "$b" in README.md) continue ;; esac
-        cp "$f" "_equipment/$b"
+        slug="$(sed -n 's/^slug: *"\(.*\)" *$/\1/p' "$f" | head -1)"
+        emit "$f" "$EQUIP/$b" equipment "equipment/${slug:-${b%.md}}" ""
     done
 fi
 
@@ -68,17 +83,16 @@ fi
 # paths to .md files. On the site those 404. Rewrite them to the published URL.
 # Absolute https:// links are left alone.
 #
-# baseurl is empty for an organisation Pages site served at the domain root, and
-# the workflow passes an empty base_path to match. If the site ever moves under a
-# path prefix, this is the one place to change.
+# The site is served at the domain root (an organisation Pages site). If it ever
+# moves under a path prefix, this is the one place to change.
 sed -i -E \
     -e 's#\]\(\.\./lab-signs/([a-z0-9-]+)\.md\)#](/signs/\1/)#g' \
     -e 's#\]\(\.\./equipment/([a-z0-9-]+)\.md\)#](/equipment/\1/)#g' \
     -e 's#\]\(([a-z0-9-]+)\.md\)#](/signs/\1/)#g' \
-    _signs/*.md
+    "$SIGNS"/*.md
 sed -i -E \
     -e 's#\]\(\.\./lab-signs/([a-z0-9-]+)\.md\)#](/signs/\1/)#g' \
     -e 's#\]\(([a-z0-9-]+)\.md\)#](/equipment/\1/)#g' \
-    _equipment/*.md
+    "$EQUIP"/*.md
 
-echo "fetched $(find _signs -name '*.md' | wc -l) signs, $(find _equipment -name '*.md' | wc -l) equipment records"
+echo "fetched $(find "$SIGNS" -name '*.md' | wc -l) signs, $(find "$EQUIP" -name '*.md' | wc -l) equipment records"

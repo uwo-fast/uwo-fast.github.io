@@ -1,0 +1,29 @@
+# URLs the built site must serve. A missing one fails the build.
+#
+# The /signs/ and /equipment/ pages are printed onto QR codes posted in the lab,
+# which cannot be recalled, so their URLs must never move. This list was taken
+# from the live site's /signs/ page on 2026-11-15. Add a sign here when it is
+# first printed; never remove one, even when the sign is retired.
+/
+/about/
+/contact/
+/projects/
+/signs/
+/equipment/fumehood/
+/equipment/printers-fgf/
+/signs/batteries-and-ewaste/
+/signs/broken-glass-and-sharps/
+/signs/chemical-and-materials-storage/
+/signs/fumehood/
+/signs/general-storage/
+/signs/manual-tools/
+/signs/power-tools/
+/signs/printers-fff/
+/signs/printers-fgf/
+/signs/printers-resin/
+/signs/safety-equipment-and-incidents/
+/signs/sink/
+/signs/soldering-station/
+/signs/stationary-tools/
+/signs/waste-disposal/
+/signs/wiring/
