@@ -41,18 +41,19 @@
 	--sl-color-black: #ffffff;
 }
 
-/* The header carries the Western purple bar in both themes. */
-.header {
+/* The page header carries the Western purple bar in both themes. Scoped to
+ * the page-level <header>: code blocks have their own `.header` too. */
+.page > header.header {
 	background-color: var(--western-purple);
 	border-bottom-color: var(--western-deep-focus);
 }
-.header .site-title,
-.header .site-title:hover {
+.page > header.header .site-title,
+.page > header.header .site-title:hover {
 	color: #ffffff;
 }
-.header starlight-theme-select select,
-.header starlight-theme-select svg,
-.header .social-icons a {
+.page > header.header starlight-theme-select select,
+.page > header.header starlight-theme-select svg,
+.page > header.header .social-icons a {
 	color: #ffffff;
 }
 
@@ -133,9 +134,12 @@
 .project-card:hover {
 	border-color: var(--sl-color-accent);
 }
+/* height: auto, or the width and height attributes Astro writes on the
+ * image keep its own proportions and the 4:3 crop never applies. */
 .project-card__image {
 	aspect-ratio: 4 / 3;
 	width: 100%;
+	height: auto;
 	object-fit: cover;
 	background-color: var(--sl-color-gray-6);
 }
@@ -144,9 +148,15 @@
 	display: grid;
 	place-items: center;
 	background-color: var(--sl-color-accent-low);
-	color: var(--sl-color-accent-high);
-	font-size: var(--sl-text-2xl);
-	font-weight: 700;
+}
+.project-card__placeholder img {
+	grid-area: 1 / 1;
+	width: 35%;
+	height: auto;
+	opacity: 0.35;
+}
+.project-section h2 {
+	margin-top: 2.5rem;
 }
 .project-card__body {
 	padding: 0.75rem 1rem 1rem;

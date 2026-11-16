@@ -5,6 +5,8 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import projects from '../data/projects.json';
 import areas from '../data/areas.json';
+import logoLight from '../assets/fast-logo-light.png';
+import logoPurple from '../assets/fast-logo-purple.png';
 
 interface Props {
 	/** Show one area only (by id). All areas when omitted. */
@@ -41,7 +43,7 @@ const groups = areas
 
 {
 	groups.map((g) => (
-		<section>
+		<section class="project-section">
 			{headings && <h2 id={g.id}>{g.title}</h2>}
 			{headings && <p>{g.summary}</p>}
 			<div class="project-grid not-content">
@@ -51,7 +53,8 @@ const groups = areas
 							<Image class="project-card__image" src={p.image} alt="" width={480} />
 						) : (
 							<div class="project-card__placeholder" aria-hidden="true">
-								{p.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 3)}
+								<Image class="light:sl-hidden" src={logoLight} alt="" width={160} />
+								<Image class="dark:sl-hidden" src={logoPurple} alt="" width={160} />
 							</div>
 						)}
 						<div class="project-card__body">
